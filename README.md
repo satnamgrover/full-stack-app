@@ -3,6 +3,13 @@
 A full-stack web application deployed using Docker, with CI/CD automation, MongoDB database, and Nginx reverse proxy. This project demonstrates end-to-end setup, deployment, and infrastructure management.
 
 ---
+```mermaid
+flowchart TD
+    A[Developer pushes code to GitHub] --> B[Jenkins detects commit]
+    B --> C[Build Docker Images: Frontend & Backend]
+    C --> D[Push Docker Images to Docker Hub]
+    D --> E[Deploy via Docker Compose]
+```
 
 ## Table of Contents
 
@@ -95,5 +102,11 @@ This project includes:
    - Backend API served on `/api`    
 3. After configuration, the entire application should be accessible through the VM’s IP address on port 80.
 
+
 ---
+![First Screenshot](screenshots/first_screenshot.png)
+
+![second Screenshot](screenshots/second_screenshot.png)
+
+![third Screenshot](screenshots/third_screenshot.png)
 
