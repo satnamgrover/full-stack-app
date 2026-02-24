@@ -16,31 +16,49 @@ pipeline {
         }
 
         stage('Build Docker Images') {
-            steps {
-                script {
-                    docker.build("${FRONTEND_IMAGE}:${IMAGE_TAG}", "./frontend")
-                    docker.build("${BACKEND_IMAGE}:${IMAGE_TAG}", "./backend")
+            parallel {
+                stage('Frontend') {
+                    steps {
+                        script {
+                            docker.build("${FRONTEND_IMAGE}:${IMAGE_TAG}", "./frontend")
+                        }
+                    }
+                }
+                stage('Backend') {
+                    steps {
+                        script {
+                            docker.build("${BACKEND_IMAGE}:${IMAGE_TAG}", "./backend")
+                        }
+                    }
                 }
             }
         }
 
         stage('Push Images') {
             steps {
-                sh """
-                    echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin
-                    docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
-                    docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
-                    docker tag ${FRONTEND_IMAGE}:${IMAGE_TAG} ${FRONTEND_IMAGE}:latest
-                    docker tag ${BACKEND_IMAGE}:${IMAGE_TAG} ${BACKEND_IMAGE}:latest
-                    docker push ${FRONTEND_IMAGE}:latest
-                    docker push ${BACKEND_IMAGE}:latest
-                    docker logout
-                """
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        docker.image("${FRONTEND_IMAGE}:${IMAGE_TAG}").push()
+                        docker.image("${BACKEND_IMAGE}:${IMAGE_TAG}").push()
+                        docker.image("${FRONTEND_IMAGE}:${IMAGE_TAG}").push('latest')
+                        docker.image("${BACKEND_IMAGE}:${IMAGE_TAG}").push('latest')
+                    }
+                }
             }
         }
-        stage('deployment'){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                dir("${WORKSPACE}") {
+                    // Export variables for docker-compose
+                    sh """
+                        export FRONTEND_IMAGE=${FRONTEND_IMAGE}
+                        export BACKEND_IMAGE=${BACKEND_IMAGE}
+                        export IMAGE_TAG=${IMAGE_TAG}
+                        docker-compose down || true
+                        docker-compose up -d
+                    """
+                }
             }
         }
     }
