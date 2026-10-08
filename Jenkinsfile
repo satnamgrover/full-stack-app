@@ -47,19 +47,28 @@ pipeline {
             }
         }
 
-        stage('Deploy with Docker Compose') {
+        stage('Deploy with k8s') {
             steps {
-                dir("${WORKSPACE}") {
+                script {
                     // Export variables for docker-compose
                     sh """
-                        export FRONTEND_IMAGE=${FRONTEND_IMAGE}
-                        export BACKEND_IMAGE=${BACKEND_IMAGE}
-                        export IMAGE_TAG=${IMAGE_TAG}
-                        docker-compose down || true
-                        docker-compose up -d
+                        kubectl apply -f k8s/namespace.yaml
+                        kubectl apply -f k8s/database/
+                        kubectl apply -f k8s/backend/
+                        kubectl apply -f k8s/frontend/
+                        kubectl apply -f k8s/nginx/
                     """
                 }
             }
+        
         }
+        stage('public access in browser') {
+            steps{
+                script{
+                    sh """ kubectl port-forward svc/nginx -n my-app 8080:80 --address=0.0.0.0 & """
+                }
+            }
+        }
+        
     }
 }
