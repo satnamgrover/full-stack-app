@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: front:latest
+          image: <your image name>:<tag of image>
           imagePullPolicy: Never
           ports:
             - name: http
