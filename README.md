@@ -82,7 +82,7 @@ The same architecture is used in both Docker Compose and Kubernetes. In Kubernet
 │   ├── backend/
 │   │   ├── deployment.yaml
 │   │   └── service.yaml
-│   └── mongodb/
+│   └── database/
 │       ├── statefulset.yaml
 │       └── service.yaml
 ├── docker-compose.yml
