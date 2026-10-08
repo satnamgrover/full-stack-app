@@ -1,0 +1,12 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+   name: mongo-pv
+   namespace: my-app
+spec:
+   capacity:
+     storage: 500Mi
+   accessModes:
+     - ReadWriteOnce
+   hostPath:
+     path: "home/data/"
